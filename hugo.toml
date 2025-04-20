@@ -22,6 +22,9 @@ theme = 'PaperMod'
   # Show code copy buttons
   ShowCodeCopyButtons = true
 
+  # Date format
+  dateFormat = "2006-01-02"
+
 [menu]
   [[menu.main]]
     identifier = "posts"

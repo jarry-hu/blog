@@ -16,4 +16,4 @@ pdf: "/pdfs/resume.pdf"
 
 ## Projects
 
-[Download PDF Version](/pdfs/resume.pdf)
+[Download PDF Version](/pdfs/resume.pdf) 
