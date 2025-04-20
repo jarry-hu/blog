@@ -51,4 +51,9 @@ theme = "PaperMod"
     weight = 30
 
 [outputs]
-  section = ["HTML", "RSS", "JSON"]
+  section = ["HTML"]
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
