@@ -30,6 +30,12 @@ theme = 'PaperMod'
     weight = 10
     
   [[menu.main]]
+    identifier = "resume"
+    name = "Resume"
+    url = "/resume/"
+    weight = 15
+    
+  [[menu.main]]
     identifier = "archives"
     name = "Archives"
     url = "/archives/"
