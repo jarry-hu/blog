@@ -17,4 +17,4 @@ In this blog, I'll be writing about:
 - Personal experiences
 - And much more!
 
-Stay tuned for more content!
+Stay tuned for more content! 
