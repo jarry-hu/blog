@@ -57,3 +57,6 @@ theme = "PaperMod"
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+
+# 添加忽略日志配置，避免警告
+ignoreLogs = ['warning-goldmark-raw-html']
