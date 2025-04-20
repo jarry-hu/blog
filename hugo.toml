@@ -31,6 +31,12 @@ theme = "PaperMod"
     name = "Posts"
     url = "/posts/"
     weight = 10
+
+  [[menu.main]]
+    identifier = "daily"
+    name = "Daily"
+    url = "/daily/"
+    weight = 10
     
   [[menu.main]]
     identifier = "resume"
