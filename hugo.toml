@@ -49,3 +49,6 @@ theme = "PaperMod"
     name = "Tags"
     url = "/tags/"
     weight = 30
+
+[outputs]
+  section = ["HTML", "RSS", "JSON"]
