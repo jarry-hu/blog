@@ -1,0 +1,42 @@
+baseURL = 'https://jarryhum.github.io/blog/'
+languageCode = 'en-us'
+title = 'My Blog'
+theme = 'PaperMod'
+
+[params]
+  # Enable dark mode
+  defaultTheme = "auto"
+  
+  # Enable search
+  enableSearch = true
+  
+  # Enable table of contents
+  ShowToc = true
+  
+  # Show reading time
+  ShowReadingTime = true
+  
+  # Show post sharing buttons
+  ShowShareButtons = true
+  
+  # Show code copy buttons
+  ShowCodeCopyButtons = true
+
+[menu]
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    url = "/posts/"
+    weight = 10
+    
+  [[menu.main]]
+    identifier = "archives"
+    name = "Archives"
+    url = "/archives/"
+    weight = 20
+    
+  [[menu.main]]
+    identifier = "tags"
+    name = "Tags"
+    url = "/tags/"
+    weight = 30
