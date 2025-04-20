@@ -1,6 +1,6 @@
 baseURL = 'https://jarryhum.github.io/blog/'
 languageCode = 'en-us'
-title = 'My Blog'
+title = 'Jarry's Blog'
 theme = 'PaperMod'
 
 [params]
