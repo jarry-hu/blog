@@ -1,4 +1,4 @@
-baseURL = "https://jarryhum.github.io/blog/"
+baseURL = "https://jarry-hu.github.io/blog/"
 languageCode = "en-us"
 title = "Jarry's Blog"
 theme = "PaperMod"
