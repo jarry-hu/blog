@@ -1,7 +1,7 @@
-baseURL = 'https://jarryhum.github.io/blog/'
-languageCode = 'en-us'
-title = “Jarry's Blog”
-theme = “PaperMod”
+baseURL = "https://jarryhum.github.io/blog/"
+languageCode = "en-us"
+title = "Jarry's Blog"
+theme = "PaperMod"
 
 [params]
   # Enable dark mode
