@@ -1,3 +1,10 @@
+---
+title: "MYSQL 环境搭建"
+date: 2020-04-20
+draft: false
+tags: ["blog", "mysql", "first"]
+---
+
 ## MYSQL 环境搭建（ZIP）
 
 下载地址：https://dev.mysql.com/downloads/mysql/
