@@ -1,6 +1,6 @@
 ---
 title: "WPF 国际化"
-description: "C# 的国际化用什么"
+description: "C# 的国际化还是老用resx"
 date: 2025-04-22
 tags: ["programming", "C#", "WPF"]
 ---
