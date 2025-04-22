@@ -30,7 +30,7 @@ theme = "PaperMod"
     identifier = "posts"
     name = "Posts"
     url = "/posts/"
-    weight = 10
+    weight =5
 
   [[menu.main]]
     identifier = "daily"
