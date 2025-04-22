@@ -6,6 +6,7 @@ tags: ["programming", "C#", "WPF"]
 ---
 
 C#国际化官方推荐使用resx
+
 参考了了WPF的两个开源项目:
 1. [ScreenToGif](https://github.com/NickeManarin/ScreenToGif) 
 2. [PowerToys](https://github.com/microsoft/PowerToys)
