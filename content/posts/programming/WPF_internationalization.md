@@ -11,7 +11,7 @@ C#国际化官方推荐使用resx
 1. [ScreenToGif](https://github.com/NickeManarin/ScreenToGif) 
 2. [PowerToys](https://github.com/microsoft/PowerToys)
 
-- [ ] ScreenToGif 使用WPF Resource的方式来实现，个人感觉不太优雅，毕竟国际化不只有在View层会实现，在ViewModel也会涉及文字的转换，而Resource个人理解的View的东西；另一方面国际化不单单涉及文字，还有 **时间、货币、数字*
+- [ ] ScreenToGif 使用WPF Resource的方式来实现，个人感觉不太优雅，毕竟国际化不只有在View层会实现，在ViewModel也会涉及文字的转换，而Resource个人理解的View的东西；另一方面国际化不单单涉及文字，还有 **时间、货币、数字**
 - [x] PowerToys使用resw方式来实现，resw 相当于 resx 的进阶版，在UWP、MAUI中可以直接通过在xaml中x:UID="资源名"的方式直接可以从resw文件中找到字体资源。
 
 - 我选择使用resx的方式来实现，还有个原因是resx有很多开源工具辅助编辑，像[ResXResourceManager](https://github.com/dotnet/ResXResourceManager)
