@@ -33,6 +33,12 @@ theme = "PaperMod"
     weight =5
 
   [[menu.main]]
+    identifier = "invest"
+    name = "Invest"
+    url = "/invest/"
+    weight = 7
+
+  [[menu.main]]
     identifier = "daily"
     name = "Daily"
     url = "/daily/"
