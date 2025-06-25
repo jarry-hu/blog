@@ -1,5 +1,5 @@
 ---
-title: "MYSQL 环境搭建"
+title: "Summary"
 date: 2025-06-25
 draft: false
 tags: ["blog", "industry", "first"]
