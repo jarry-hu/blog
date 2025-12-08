@@ -18,7 +18,7 @@ C#国际化官方推荐使用resx
 （vs插件），它最神奇的是已经对接了很多AI工具; WPF中目前只支持resx的方式，但是我们可以自定义一个MarkupExtension，来实现类x:UID的实现;
 ``` C#
     ├── MainWindow.xaml
-├── Resources/
+├── Resources/                    // 手动创建Strings.resx 其他resx文件由ResXResourceManager生成
 │   ├── Strings.resx              // 默认语言（如英文）
 │   ├── Strings.zh-Hans.resx      // 简体中文
 │   └── Strings.fr.resx           // 法语
@@ -76,7 +76,7 @@ C#国际化官方推荐使用resx
         }
     }
     // 这样我们在xaml 中就可以直接这样调用
-    TextBlock Text="{local:Loc HelloWorld}" />
+    <TextBlock Text="{local:Loc HelloWorld}" />
     // 对比UWP中的实现，代码量也差不多
-    TextBlock x:UID="HelloWorld" />
+    <TextBlock x:UID="HelloWorld" />
 ```
