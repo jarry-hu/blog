@@ -27,56 +27,159 @@ C#国际化官方推荐使用resx
 └── LocalizationManager.cs
 
     
-    public class TranslationSource : INotifyPropertyChanged
+
+    /// <summary>
+    /// 语言管理
+    /// </summary>
+    public class TranslationManager : INotifyPropertyChanged
     {
-        public static TranslationSource Instance { get; } = new TranslationSource();
+        // 单例模式
+        public static TranslationManager Instance { get; } = new TranslationManager();
 
-        private readonly ResourceManager _resourceManager =
-            new ResourceManager("MyWpfApp.Resources.Strings", Assembly.GetExecutingAssembly());
+        private ResourceManager? _resourceManager = new ResourceManager("MVI3000.Client.Core.Resources.Strings", Assembly.GetExecutingAssembly());
+        private CultureInfo? _currentCulture;
 
-        public string this[string key] => _resourceManager.GetString(key, CultureInfo.CurrentUICulture);
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void RaisePropertyChanged()
+        public CultureInfo? CurrentCulture
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+            get => _currentCulture;
+            set
+            {
+                if (_currentCulture != value)
+                {
+                    _currentCulture = value;
+                    // 切换语言时，通知所有监听者
+                    OnPropertyChanged(nameof(CurrentCulture));
+                }
+            }
+        }
+
+        // 设置你的资源文件 (Resx)
+        public ResourceManager? ResourceManager
+        {
+            get => _resourceManager;
+            set => _resourceManager = value;
+        }
+
+        public string GetString(string key)
+        {
+            if (string.IsNullOrEmpty(key) || _resourceManager == null) return key;
+            return _resourceManager.GetString(key, _currentCulture) ?? key;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    public class TranslateConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            // values[0]: 实际的 Key (字符串)
+            // values[1]: 语言管理器实例 (我们不使用它，只是为了监听它的变动)
+
+            if (values.Length > 0 && values[0] is string key)
+            {
+                return TranslationManager.Instance.GetString(key);
+            }
+            return string.Empty;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 
+    /// <summary>
+    /// 语言本地化扩展
+    /// </summary>
+    [ContentProperty(nameof(Key))]
     public class LocExtension : MarkupExtension
     {
-        public string Key { get; set; }
+        public object Key { get; set; } = string.Empty;
+        public string? StringFormat { get; set; }
 
-        public LocExtension(string key)
+        public LocExtension()
+        {
+
+        }
+
+        public LocExtension(object key)
         {
             Key = key;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            var binding = new Binding($"[{Key}]")
+            // 1. 基础判空
+            if (serviceProvider == null) return this;
+            var pvt = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
+            if (pvt == null || pvt.TargetObject == null) return this;
+
+            // 2. ★★★ 增强版设计模式检查 ★★★
+            if (DesignerProperties.GetIsInDesignMode(new DependencyObject()))
             {
-                Source = TranslationSource.Instance,
-                Mode = BindingMode.OneWay
-            };
-            return binding.ProvideValue(serviceProvider);
-        }
-    }
+                // 如果目标是 DependencyProperty
+                if (pvt.TargetProperty is DependencyProperty dp)
+                {
+                    // 如果目标是 String 或者 Object (比如 Content)，都可以安全地返回字符串
+                    if (dp.PropertyType == typeof(string) || dp.PropertyType == typeof(object))
+                    {
+                        return $"[{Key}]";
+                    }
 
-    public static class LocalizationManager
-    {
-        public static void SetCulture(string culture)
-        {
-            var ci = new CultureInfo(culture);
-            Thread.CurrentThread.CurrentCulture = ci;
-            Thread.CurrentThread.CurrentUICulture = ci;
+                    // 如果是其他类型 (比如 Visibility, Brush)，
+                    // 千万别返回字符串，否则设计器报“类型转换错误”
+                    // 直接返回 UnsetValue，让它用默认值，别报错就行
+                    return DependencyProperty.UnsetValue;
+                }
 
-            TranslationSource.Instance.RaisePropertyChanged();
+                // 如果是在 Setter 或 Template 里，直接返回 this 混过去
+                return this;
+            }
+
+            // 3. 运行时逻辑
+            try
+            {
+                // ★★★ 核心修复：检查单例是否存活 ★★★
+                // 在设计器某些极端情况下(或者单元测试中)，即使 IsInDesignMode 没拦截住，
+                // Instance 也可能是 null。如果这里不防守，下面 Source=null 就会炸。
+                if (TranslationManager.Instance == null)
+                {
+                    return Key?.ToString() ?? "";
+                }
+
+                var multiBinding = new MultiBinding
+                {
+                    Converter = new TranslateConverter(),
+                    Mode = BindingMode.OneWay,
+                    StringFormat = StringFormat,
+                };
+
+                if (Key is BindingBase bindingKey)
+                {
+                    multiBinding.Bindings.Add(bindingKey);
+                }
+                else
+                {
+                    multiBinding.Bindings.Add(new Binding { Source = Key });
+                }
+
+                var langBinding = new Binding(nameof(TranslationManager.CurrentCulture))
+                {
+                    Source = TranslationManager.Instance,
+                };
+                multiBinding.Bindings.Add(langBinding);
+
+                return multiBinding.ProvideValue(serviceProvider);
+            }
+            catch
+            {
+                return DependencyProperty.UnsetValue;
+            }
         }
     }
     // 这样我们在xaml 中就可以直接这样调用
-    <TextBlock Text="{local:Loc HelloWorld}" />
-    // 对比UWP中的实现，代码量也差不多
-    <TextBlock x:UID="HelloWorld" />
+    <TextBlock Text="{local:Loc HelloWorld, StringFormat={}{0}:}" />
 ```
