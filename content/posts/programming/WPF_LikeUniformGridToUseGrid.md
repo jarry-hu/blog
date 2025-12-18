@@ -1,7 +1,7 @@
 ---
 title: "WPF 像UnifromGrid 一样去使用 Grid"
 description: "WPF 像UnifromGrid 一样去使用 Grid，不用去设置每个控件的Row 与Column"
-date: 2025-04-22
+date: 2025-12-18
 tags: ["programming", "C#", "WPF"]
 ---
 ```C#
