@@ -42,6 +42,27 @@ tags: ["programming", "C#", "WPF"]
 
         public static string GetDefaultRowHeight(DependencyObject obj) => (string)obj.GetValue(DefaultRowHeightProperty);
         public static void SetDefaultRowHeight(DependencyObject obj, string value) => obj.SetValue(DefaultRowHeightProperty, value);
+        // --- 统一 Margin 功能 ---
+        public static readonly DependencyProperty UniformMarginProperty =
+            DependencyProperty.RegisterAttached("UniformMargin", typeof(Thickness), typeof(GridHelper),
+                new PropertyMetadata(default(Thickness), OnUniformMarginChanged));
+
+        // --- 统一水平对齐 (HorizontalAlignment) ---
+        public static readonly DependencyProperty UniformHorizontalAlignmentProperty =
+            DependencyProperty.RegisterAttached("UniformHorizontalAlignment", typeof(HorizontalAlignment), typeof(GridHelper),
+                new PropertyMetadata(HorizontalAlignment.Stretch, OnUniformAlignmentChanged)); // 默认为 Stretch
+
+        public static void SetUniformHorizontalAlignment(DependencyObject element, HorizontalAlignment value) => element.SetValue(UniformHorizontalAlignmentProperty, value);
+        public static HorizontalAlignment GetUniformHorizontalAlignment(DependencyObject element) => (HorizontalAlignment)element.GetValue(UniformHorizontalAlignmentProperty);
+
+        // --- 统一垂直对齐 (VerticalAlignment) ---
+        public static readonly DependencyProperty UniformVerticalAlignmentProperty =
+            DependencyProperty.RegisterAttached("UniformVerticalAlignment", typeof(VerticalAlignment), typeof(GridHelper),
+                new PropertyMetadata(VerticalAlignment.Stretch, OnUniformAlignmentChanged)); // 默认为 Stretch
+
+        public static void SetUniformVerticalAlignment(DependencyObject element, VerticalAlignment value) => element.SetValue(UniformVerticalAlignmentProperty, value);
+        public static VerticalAlignment GetUniformVerticalAlignment(DependencyObject element) => (VerticalAlignment)element.GetValue(UniformVerticalAlignmentProperty);
+
         #endregion
 
         // 统一的属性变更回调
@@ -208,6 +229,77 @@ tags: ["programming", "C#", "WPF"]
             {
                 if (double.TryParse(part, out double val)) return new GridLength(val);
                 return GridLength.Auto;
+            }
+        }
+
+        public static void SetUniformMargin(DependencyObject element, Thickness value) => element.SetValue(UniformMarginProperty, value);
+        public static Thickness GetUniformMargin(DependencyObject element) => (Thickness)element.GetValue(UniformMarginProperty);
+
+        private static void OnUniformMarginChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Grid grid)
+            {
+                // 如果 Grid 还没加载好，等加载完再设置
+                if (!grid.IsLoaded)
+                {
+                    grid.Loaded += (s, args) => ApplyMargin((Grid)s);
+                }
+                else
+                {
+                    ApplyMargin(grid);
+                }
+            }
+        }
+
+        private static void ApplyMargin(Grid grid)
+        {
+            var margin = GetUniformMargin(grid);
+            foreach (UIElement child in grid.Children)
+            {
+                // 只有 FrameworkElement (绝大多数控件) 才有 Margin 属性
+                if (child is FrameworkElement fe)
+                {
+                    fe.Margin = margin;
+                }
+            }
+        }
+        // --- 变更处理逻辑 ---
+        private static void OnUniformAlignmentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Grid grid)
+            {
+                if (grid.IsLoaded) ApplyAlignments(grid);
+                else grid.Loaded += (s, args) => ApplyAlignments((Grid)s);
+            }
+        }
+
+        private static void ApplyAlignments(Grid grid)
+        {
+            // 获取当前设置的值
+            var hAlign = GetUniformHorizontalAlignment(grid);
+            var vAlign = GetUniformVerticalAlignment(grid);
+
+            foreach (UIElement child in grid.Children)
+            {
+                // Alignment 属性定义在 FrameworkElement 上 (几乎所有控件都是)
+                if (child is FrameworkElement fe)
+                {
+                    // --- 关键修改 ---
+                     // 判断依据：ReadLocalValue(...) == DependencyProperty.UnsetValue
+                     // 意思就是：用户在 XAML 标签里没有写 HorizontalAlignment="..."
+
+                    // 1. 水平对齐：只有当用户没设置时，才应用统一值
+                    if (fe.ReadLocalValue(FrameworkElement.HorizontalAlignmentProperty) == DependencyProperty.UnsetValue)
+                    {
+                        fe.HorizontalAlignment = hAlign;
+                    }
+
+                    // 2. 垂直对齐：同理
+                    if (fe.ReadLocalValue(FrameworkElement.VerticalAlignmentProperty) == DependencyProperty.UnsetValue)
+                    {
+                        fe.VerticalAlignment = vAlign;
+                    }
+                }
             }
         }
     }
