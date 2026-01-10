@@ -1,7 +1,7 @@
 ---
 title: "WPF DataGrid自定义"
 description: "DataGrid 添加序号与CheckBox"
-date: 2025-04-22
+date: 2026-01-10
 tags: ["programming", "C#", "WPF"]
 ---
 
