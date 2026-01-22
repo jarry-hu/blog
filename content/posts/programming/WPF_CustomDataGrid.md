@@ -1,7 +1,7 @@
 ---
 title: "WPF DataGrid自定义"
 description: "DataGrid 添加序号与CheckBox"
-date: 2026-01-10
+date: 2026-01-22
 tags: ["programming", "C#", "WPF"]
 ---
 
@@ -42,6 +42,26 @@ DataGrid 添加序号与CheckBox
             }
         }
 
+
+        private static void OnItemsSourceChanged(object? sender, EventArgs e)
+        {
+            if (sender is DataGrid dg)
+            {
+                dg.SelectAll();
+                var myCollection = dg.ItemsSource as INotifyCollectionChanged;
+
+                if (myCollection != null)
+                {
+                    myCollection.CollectionChanged += (s, e) => OnCollectionChanged(s, e, dg);
+                }
+            }
+        }
+
+        private static void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e, DataGrid dg)
+        {
+            dg.SelectAll();
+        }
+
         private static void ApplySelection(DataGrid dg, bool all)
         {
             dg.Dispatcher.BeginInvoke(new Action(() =>
@@ -49,6 +69,18 @@ DataGrid 添加序号与CheckBox
                 if (all)
                 {
                     if (dg.SelectedItems.Count != dg.Items.Count) dg.SelectAll();
+                    var dpd = DependencyPropertyDescriptor.FromProperty(DataGrid.ItemsSourceProperty, typeof(DataGrid));
+
+                    if (dpd != null)
+                    {
+                        dpd.AddValueChanged(dg, OnItemsSourceChanged);
+                    }
+                    var myCollection = dg.ItemsSource as INotifyCollectionChanged;
+
+                    if (myCollection != null)
+                    {
+                        myCollection.CollectionChanged += (s, e) => OnCollectionChanged(s, e, dg);
+                    }
                 }
                 else
                 {
@@ -94,8 +126,14 @@ DataGrid 添加序号与CheckBox
         {
             if (d is DataGrid dg)
             {
-                if ((bool)e.NewValue) dg.SelectionChanged += DataGrid_SelectionChanged;
-                else dg.SelectionChanged -= DataGrid_SelectionChanged;
+                if ((bool)e.NewValue)
+                {
+                    dg.SelectionChanged += DataGrid_SelectionChanged;
+                }
+                else
+                {
+                    dg.SelectionChanged -= DataGrid_SelectionChanged;
+                }
             }
         }
 
@@ -103,67 +141,25 @@ DataGrid 添加序号与CheckBox
         {
             if (sender is DataGrid dg)
             {
-                // 1. 同步 IsAllSelected 状态
-                bool? isAll = dg.SelectedItems.Count == dg.Items.Count;
-                if (dg.SelectedItems.Count > 0 && dg.SelectedItems.Count < dg.Items.Count) isAll = null; 
-                if (GetIsAllSelected(dg) != isAll)
-                {
-                    SetIsAllSelected(dg, isAll);
-                }
-
-                // 2. 执行 SelectedCommand
-                var command = GetSelectedCommand(dg);
-                if (command != null && command.CanExecute(dg.SelectedItems))
-                {
-                    command.Execute(dg.SelectedItems);
-                }
-            }
-        }
-        // 5. 定义 EnableAutoFiller 附加属性
-        // 当设置为 True 时，会自动在 DataGrid 末尾添加一个 * 宽度的空白列，使其占满剩余空间
-        public static readonly DependencyProperty EnableAutoFillerProperty =
-            DependencyProperty.RegisterAttached(
-                "EnableAutoFiller",
-                typeof(bool),
-                typeof(DataGridHelper),
-                new PropertyMetadata(false, OnEnableAutoFillerChanged));
-
-        public static bool GetEnableAutoFiller(DependencyObject element) => (bool)element.GetValue(EnableAutoFillerProperty);
-        public static void SetEnableAutoFiller(DependencyObject element, bool value) => element.SetValue(EnableAutoFillerProperty, value);
-
-        private static void OnEnableAutoFillerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is DataGrid dg && (bool)e.NewValue)
-            {
-                dg.Loaded += DataGrid_Loaded_Filler;
+                UpdateCheckBoxStatus(dg);
             }
         }
 
-        private static void DataGrid_Loaded_Filler(object sender, RoutedEventArgs e)
+        private static void UpdateCheckBoxStatus(DataGrid dg)
         {
-            if (sender is DataGrid dg)
+            // 1. 同步 IsAllSelected 状态
+            bool? isAll = dg.SelectedItems.Count == dg.Items.Count;
+            if (dg.SelectedItems.Count > 0 && dg.SelectedItems.Count < dg.Items.Count) isAll = null;
+            if (GetIsAllSelected(dg) != isAll)
             {
-                dg.Loaded -= DataGrid_Loaded_Filler;
+                SetIsAllSelected(dg, isAll);
+            }
 
-                // 如果已经有 * 宽度的列，则不需要添加占位列
-                if (dg.Columns.Any(c => c.Width.IsStar)) return;
-
-                // 添加一个隐藏内容的占位列，宽度为 *，占满剩余所有空间
-                var filler = new DataGridTemplateColumn
-                {
-                    Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                    IsReadOnly = true,
-                    Header = null,
-                    CellStyle = new Style(typeof(DataGridCell))
-                    {
-                        Setters = {
-                            new Setter(DataGridCell.BackgroundProperty, System.Windows.Media.Brushes.Transparent),
-                            new Setter(DataGridCell.BorderThicknessProperty, new Thickness(0)),
-                            new Setter(DataGridCell.FocusableProperty, false)
-                        }
-                    }
-                };
-                dg.Columns.Add(filler);
+            // 2. 执行 SelectedCommand
+            var command = GetSelectedCommand(dg);
+            if (command != null && command.CanExecute(dg.SelectedItems))
+            {
+                command.Execute(dg.SelectedItems);
             }
         }
     }
